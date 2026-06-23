@@ -84,7 +84,7 @@ def BiGauss_LOOCV(csv_path: str,
     }
 
     keys = pd.unique(df["leave_out_key"])
-    iterator = tqdm(keys, desc=f"calibrating: {csv_path}") if show_progress else keys
+    iterator = tqdm(keys, desc=f"calibrating {csv_path}") if show_progress else keys
 
     for key in iterator:
         a, b = key.split("|")
