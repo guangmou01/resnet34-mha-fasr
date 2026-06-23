@@ -4,13 +4,13 @@ This repository stores and continuously updates software tools for likelihood-ra
 
 The toolkit currently includes modules for:
 
-- frontend acoustic feature extraction; 
-- DNN speaker embedding extraction; 
-- backend likelihood-ratio scoring; 
-- score calibration; 
-- system validation.
+- frontend acoustic feature extraction (`frontend`);
+- DNN speaker embedding extraction (`frontend`); 
+- backend likelihood-ratio scoring (`plda`); 
+- score calibration (`calibration`); 
+- system validation (`metric`).
 
-We trained a speaker embedding extractor on VoxCeleb1+2 (7,205 spks). The model uses a ResNet34 backbone enhanced with multi-head attentive statistics pooling (MHA), referred to here as ResNet34-MHA. It achieved good performance in the ‘forensic_eval_01’ benchmark test (see `forensic_eval_01_demo.ipynb`).
+We trained a speaker embedding extractor on VoxCeleb1+2 (7205 speakers). The model uses a ResNet34 backbone enhanced with multi-head attentive statistics pooling (MHA), referred to here as ResNet34-MHA. It achieved good performance in the ‘forensic_eval_01’ benchmark test (see `forensic_eval_01_demo.ipynb`).
 
 ### News & Development Plan
 
@@ -40,12 +40,13 @@ An expected project root should be:
 resnet34-mha-fasr/
 ├── frontend/
 ├── plda/
-├── metric/
 ├── calibration/
+├── metric/
 ├── forensic_eval_01/
 ├── resnet34_mha.onnx
 ├── forensic_eval_01_demo.ipynb
 ├── .gitignore
+├── requirements.txt
 └── README.md
 ```
 

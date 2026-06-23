@@ -40,14 +40,12 @@ class Whiten:
         n_samples, n_features = X.shape
 
         # 1. Estimate the total covariance matrix.
-
         Sigma = np.cov(X, rowvar=False, bias=False)
 
         # Force symmetry.
         Sigma = 0.5 * (Sigma + Sigma.T)
 
         # 2. Regularize the total covariance matrix.
-
         # Sigma_reg = Sigma + reg * I
         Sigma_reg = Sigma + self.reg * np.eye(n_features)
 
@@ -56,7 +54,6 @@ class Whiten:
         eigvals = np.maximum(eigvals, self.eps)
 
         # 4. Inverse square root:
-
         # W = Sigma_reg^(-1/2)
         W = (eigvecs
              @ np.diag(1.0 / np.sqrt(eigvals))
@@ -91,10 +88,10 @@ class RG:
     """
     Numpy + Scipy implementation of Radial Gaussianization (RG).
 
-    Garcia-Romero, D., & Espy-Wilson, C. Y. (2011).
-    Analysis of i-vector length normalization in speaker recognition systems.
-    Proc. Interspeech 2011, 249–252.
-    https://doi.org/10.21437/Interspeech.2011-53
+    Lyu, S., & Simoncelli, E. P. (2009).
+    Nonlinear Extraction of Independent Components of Natural Images Using Radial Gaussianization.
+    Neural Computation, 21(6), 1485–1519.
+    https://doi.org/10.1162/neco.2009.04-08-773
     """
 
     def __init__(self,
@@ -180,10 +177,10 @@ def LN(X: np.ndarray,
     """
     Apply length normalization/equalization to row vectors.
 
-    Lyu, S., & Simoncelli, E. P. (2009).
-    Nonlinear Extraction of Independent Components of Natural Images Using Radial Gaussianization.
-    Neural Computation, 21(6), 1485–1519.
-    https://doi.org/10.1162/neco.2009.04-08-773
+    Garcia-Romero, D., & Espy-Wilson, C. Y. (2011).
+    Analysis of i-vector length normalization in speaker recognition systems.
+    Proc. Interspeech 2011, 249–252.
+    https://doi.org/10.21437/Interspeech.2011-53
 
     :param X: Data matrix with shape [n_samples, n_features].
     :param eps: Small value used to avoid division by zero.

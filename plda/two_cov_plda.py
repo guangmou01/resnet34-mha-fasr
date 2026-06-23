@@ -150,7 +150,9 @@ class TwoCovPLDA:
                 x_k: np.ndarray,
                 model: dict) -> float:
         """
-        Calculate common-source LR by pre-trained PLDA model.
+        Calculate common-source LR score by pre-trained PLDA model.
+
+        score = log-f(x_q, x_k|H_same) - log-f(x_q, x_k|H_diff)
 
         :param x_q: Questioned-source vector with shape [1, n_features].
         :param x_k: Known-source vector with shape [1, n_features].
