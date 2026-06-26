@@ -106,11 +106,13 @@ def train_BiGauss_regularized(targets: np.ndarray,
 
     cdf_vals = np.cumsum(summed_weights)
 
+    # values below/above calibration range are mapped to endpoint CDF values,
+    # not to 0 or 1.
     weighted_ecdf = interp1d(
         uniq_scores,
         cdf_vals,
         bounds_error=False,
-        fill_value=(0.0, 1.0)
+        fill_value=(cdf_vals[0], cdf_vals[-1])
     )
 
     # Step-5 target Bi-Gaussian mixture CDF
