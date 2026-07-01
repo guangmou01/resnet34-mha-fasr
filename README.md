@@ -10,7 +10,7 @@ The toolkit currently includes modules for:
 - score calibration (`calibration`); 
 - system validation (`metric`).
 
-We trained a speaker embedding extractor on VoxCeleb1+2 (7205 speakers). The model uses a ResNet34 backbone enhanced with multi-head attentive statistics pooling (MHA), referred to here as ResNet34-MHA. It achieved good performance in the ‘forensic_eval_01’ benchmark test (see `forensic_eval_01_demo.ipynb`).
+We trained a speaker embedding extractor on VoxCeleb1+2 (7205 speakers). The model uses a ResNet34 backbone (He et al., 2016) enhanced with multi-head attentive statistics pooling (MHA, see India et al., 2019), referred to here as ResNet34-MHA. It achieved good performance in the ‘forensic_eval_01’ benchmark test (see `forensic_eval_01_demo.ipynb`).
 
 ### News & Development Plan
 
@@ -55,6 +55,17 @@ Install the required packages:
 ```bash
 pip install -r requirements.txt
 ```
+
+### References
+
+- He, K., Zhang, X., Ren, S., & Sun, J. (2016). Deep Residual learning for image recognition. 2016 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 770–778. https://doi.org/10.1109/CVPR.2016.90
+- India, M., Safari, P., & Hernando, J. (2019). Self multi-Head attention for speaker recognition. arXiv. https://doi.org/10.48550/arXiv.1906.09890
+- Morrison, G. S., Enzinger, E., Daniel, R., Joaquín, G.-R., & Alicia, L.-D. (2020). Statistical models in forensic voice comparison. In D. L. Banks, K. Kafadar, D. H. Kaye, & M. Tackett, Handbook of Forensic Statistics (pp. 451–497). CRC Press.
+- Morrison, G. S., & Enzinger, E. (2016). Multi-laboratory evaluation of forensic voice comparison systems under conditions reflecting those of a real forensic case (forensic_eval_01) — Introduction. Speech Communication, 85, 119–126. https://doi.org/10.1016/j.specom.2016.07.006
+- Morrison, G. S., & Enzinger, E. (2019). Multi-laboratory evaluation of forensic voice comparison systems under conditions reflecting those of a real forensic case (forensic_eval_01) — Conclusion. Speech Communication, 112, 37–39. https://doi.org/10.1016/j.specom.2019.06.007
+
+
+
 
 
 

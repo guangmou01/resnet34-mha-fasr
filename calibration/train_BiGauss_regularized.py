@@ -30,7 +30,7 @@ def train_BiGauss_regularized(targets: np.ndarray,
 
     We modified the original implementation to support logistic-regression fusion and used the Bi-Gaussianized step
     described by Morrison (2024) to transform the score toward a perfectly-calibrated bi-Gaussian distribution.
-    Note that when the task is calibration of a single system, the result should be equivalent to that of the original implementation.
+    Note that when the task is single system calibration, the result should be equivalent to that of the original implementation.
 
     reference:
     Morrison, G. S. (2024).
