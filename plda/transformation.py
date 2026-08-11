@@ -167,7 +167,12 @@ class RG:
         )
 
         # 3. Rescale the vector to the new radius
-        scale = new_radius / np.maximum(radius, eps)
+        scale = np.divide(
+            new_radius,
+            radius,
+            out=np.ones_like(radius),
+            where=radius > eps
+        )
         data_rg = data * scale[:, None]
 
         return data_rg

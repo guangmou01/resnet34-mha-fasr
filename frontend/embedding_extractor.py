@@ -8,13 +8,16 @@ from frontend.fbank import get_fbank
 class EmbeddingExtractor:
     def __init__(self,
                  onnx_path: str,
-                 device: str = "cpu"):
+                 device: str = "cpu",
+                 embedding_type: str = "r-vector"):
         """
         :param onnx_path: Path to the ONNX model.
         :param device: "cpu" or "cuda"
+        :param embedding_type: "r-vector" or "x-vector"
         """
         self.onnx_path = onnx_path
         self.device = device
+        self.embedding_type = embedding_type
 
         if self.device == "cuda":
             providers = ["CUDAExecutionProvider", "CPUExecutionProvider"]
@@ -34,8 +37,11 @@ class EmbeddingExtractor:
 
         :return embedding: Extracted embedding, dtype float32.
         """
-        fbank = get_fbank(audio_path)          # [1, T, 64]
+        fbank = get_fbank(audio_path)                         # [1, T, 64]
         fbank = fbank.numpy().astype(np.float32)
+
+        if self.embedding_type == "x-vector":
+            fbank = np.transpose(fbank, (0, 2, 1))      # [1, 64, T]
 
         embedding = self.session.run(
             None,

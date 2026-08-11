@@ -99,7 +99,7 @@ class LDA:
         :param data: Feature matrix with shape [n_samples, n_features].
         :param V: LDA transformation matrix returned by LDA.train() with shape [n_features, lda_dim].
 
-        :return: LDA-transformed data with shape [n_samples, lda_dim].
+        :return transformed_data: LDA-transformed data with shape [n_samples, lda_dim].
         """
 
         data = np.asarray(data, dtype=float)

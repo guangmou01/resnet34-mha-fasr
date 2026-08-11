@@ -1,18 +1,18 @@
-# PATH: plda/pipeline.py
-# A wrapped PLDA pipeline for backend LR-score calculation
+# PATH: plda/pipeline_lda.py
+# A wrapped PCA-PLDA pipeline for backend LR-score calculation
 
 # This pipeline includes transformation:
-# Feature data -> LDF/LDA -> centering -> whitening -> length transformation -> two-covariance PLDA
+# Feature data -> PCA -> centering -> whitening -> length transformation -> two-covariance PLDA
 
 import os
 import h5py
 import numpy as np
 
-from .lda import LDA
+from .pca import PCA
 from .transformation import Whiten, RG, LN
 from .two_cov_plda import TwoCovPLDA
 
-class pipeline:
+class pipeline_pca:
 
     def __init__(self):
         pass
@@ -21,9 +21,9 @@ class pipeline:
               training_set_path: str = "training_set.h5",
               label_key: str = "labels",
               feature_key: str = "embeddings",
-              lda_dim: int = 50,
-              lda_shrinkage: float = 0.1,
-              lda_eps: float = 1e-6,
+              pca_dim: int = None,
+              pca_var: float = None,
+              pca_reg: float = 0.1,
               whiten_reg: float = 0.1,
               whiten_eps: float = 1e-6,
               length_transformation: str = "RG",
@@ -33,9 +33,9 @@ class pipeline:
         :param training_set_path: Path to the training set (should be a .h5 file).
         :param label_key: Dataset key for labels in the .h5 file.
         :param feature_key: Dataset key for training embeddings/features in the .h5 file.
-        :param lda_dim: LDA output dimension.
-        :param lda_shrinkage: Shrinkage coefficient in LAD training.
-        :param lda_eps: Eigenvalue floor used in LAD training.
+        :param pca_dim: Fixed number of the output PCA dimension.
+        :param pca_var: Retained explained variance ratio.
+        :param pca_reg: Regularization coefficient for the covariance matrix estimation.
         :param whiten_reg: Regularization coefficient in Whiten training.
         :param whiten_eps: Eigenvalue floor used in Whiten training.
         :param length_transformation: Transformation method for vector length.
@@ -59,18 +59,29 @@ class pipeline:
         features = np.asarray(features, dtype=np.float64)
         print("Data shape:", features.shape)
 
-        # 2. LDA
-        print("Step 2: Training LDA")
+        # 2. PCA
+        print("Step 2: Training PCA")
 
-        lda = LDA(shrinkage=lda_shrinkage, eps=lda_eps)
-        LDA_V = lda.train(y=labels, X=features, lda_dim=lda_dim)
-        features_lda = lda.apply(data=features, V=LDA_V)
+        pca = PCA(reg=pca_reg)
+
+        PCA_mean, PCA_V, PCA_dim, PCA_var = pca.train(
+            X=features,
+            pca_dim=pca_dim,
+            pca_var=pca_var
+        )
+
+        print(
+            f"PCA dimension: {PCA_dim} "
+            f"(retained variance: {PCA_var:.4f})"
+        )
+
+        features_pca = pca.apply(data=features, mean=PCA_mean, V=PCA_V)
 
         # 3. Centering
         print("Step 3: Centering")
 
-        Center_mean = np.mean(features_lda, axis=0)
-        features_centered = features_lda - Center_mean
+        Center_mean = np.mean(features_pca, axis=0)
+        features_centered = features_pca - Center_mean
 
         # 4. Whitening
         print("Step 4: Whitening")
@@ -108,8 +119,9 @@ class pipeline:
             os.makedirs(save_dir, exist_ok=True)
 
         with h5py.File(save_path, "w") as f:
-            # LDA
-            f.create_dataset("LDA_V",               data=LDA_V)
+            # PCA
+            f.create_dataset("PCA_mean",            data=PCA_mean)
+            f.create_dataset("PCA_V",               data=PCA_V)
 
             # Centering
             f.create_dataset("Center_mean",         data=Center_mean)
@@ -137,9 +149,9 @@ class pipeline:
             f.create_dataset("N_sources",               data=np.array(len(np.unique(labels))))
             f.create_dataset("N_samples",               data=np.array(features.shape[0]))
             f.create_dataset("Input_dim",               data=np.array(features.shape[1]))
-            f.create_dataset("LDA_dim",                 data=np.array(lda_dim))
-            f.create_dataset("LDA_shrinkage",           data=np.array(lda_shrinkage))
-            f.create_dataset("LDA_eps",                 data=np.array(lda_eps))
+            f.create_dataset("PCA_var",                 data=np.array(PCA_var))
+            f.create_dataset("PCA_dim",                 data=np.array(PCA_dim))
+            f.create_dataset("PCA_reg",                 data=np.array(pca_reg))
             f.create_dataset("Whiten_reg",              data=np.array(whiten_reg))
             f.create_dataset("Whiten_eps",              data=np.array(whiten_eps))
             f.create_dataset("Length_Transformation",   data=np.bytes_(length_transformation))
@@ -156,7 +168,7 @@ class pipeline:
 
         :param x_q: Questioned-source vector with shape [1, n_features].
         :param x_k: Known-source vector with shape [1, n_features].
-        :param model_path: The .h5 file returned by pipeline.train().
+        :param model_path: The .h5 file returned by pipeline_pca.train().
 
         :return score: Uncalibrated natural-log-likelihood-ratio score, ln(LR).
         """
@@ -165,7 +177,8 @@ class pipeline:
         x_k = np.asarray(x_k, dtype=np.float64)
 
         with h5py.File(model_path, "r") as f:
-            LDA_V = f["LDA_V"][:]
+            PCA_mean = f["PCA_mean"][:]
+            PCA_V = f["PCA_V"][:]
 
             Center_mean = f["Center_mean"][:]
 
@@ -189,14 +202,14 @@ class pipeline:
                 "psi": f["PLDA_psi"][:]
             }
 
-        # 1. LDA
-        lda = LDA()
-        x_q_lda = lda.apply(data=x_q, V=LDA_V)
-        x_k_lda = lda.apply(data=x_k, V=LDA_V)
+        # 1. PCA
+        pca = PCA()
+        x_q_pca = pca.apply(data=x_q, mean=PCA_mean, V=PCA_V)
+        x_k_pca = pca.apply(data=x_k, mean=PCA_mean, V=PCA_V)
 
         # 2. Centering
-        x_q_centered = x_q_lda - Center_mean
-        x_k_centered = x_k_lda - Center_mean
+        x_q_centered = x_q_pca - Center_mean
+        x_k_centered = x_k_pca - Center_mean
 
         # 3. Whitening
         whitener = Whiten()
@@ -212,7 +225,7 @@ class pipeline:
             x_q_transformed = LN(x_q_whiten)
             x_k_transformed = LN(x_k_whiten)
         else:
-            raise ValueError(f"Unsupported length_transformation type: {length_transformation}")
+            raise ValueError(f"Unsupported length_transformation type: {Length_Transformation}")
 
         # 5. PLDA scoring
         plda = TwoCovPLDA()

@@ -4,11 +4,10 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from .train_BiGauss_regularized import train_BiGauss_regularized
-from .BiGauss_calibrator import BiGauss_calibrator
-from .lin_fusion import lin_fusion
+from .biGauss_calibration import biGauss_calibration
+from .logistic_regression import logistic_regression
 
-def BiGauss_LOOCV(csv_path: str,
+def biGauss_LOOCV(csv_path: str,
                   out_csv_path: str,
                   id1: str,
                   id2: str,
@@ -86,6 +85,9 @@ def BiGauss_LOOCV(csv_path: str,
     keys = pd.unique(df["leave_out_key"])
     iterator = tqdm(keys, desc=f"calibrating {csv_path}") if show_progress else keys
 
+    biGauss = biGauss_calibration()
+    LogReg = logistic_regression()
+
     for key in iterator:
         a, b = key.split("|")
 
@@ -111,7 +113,7 @@ def BiGauss_LOOCV(csv_path: str,
         train_ss = train_scores[labels[train_idx] == "ss", :]
         train_ds = train_scores[labels[train_idx] == "ds", :]
 
-        model = train_BiGauss_regularized(
+        model = biGauss.train(
             targets=train_ss.T,
             non_targets=train_ds.T,
             prior=prior,
@@ -122,12 +124,12 @@ def BiGauss_LOOCV(csv_path: str,
 
         fusion_w = model[0]
 
-        quasi = lin_fusion(
+        quasi = LogReg.apply(
             weights=fusion_w,
             scores=test_scores.T
         )
 
-        cal = BiGauss_calibrator(
+        cal = biGauss.apply(
             uncal_score=test_scores.T,
             model=model,
             grid_k=grid_k,
