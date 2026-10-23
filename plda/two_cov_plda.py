@@ -101,7 +101,7 @@ class TwoCovPLDA:
             W_prec = np.linalg.inv(W_cov)
 
         # get PLDA transformation for closed-form scoring (Kaldi-style PLDA parameterization)
-        # transform the vector into the space, where the W_cov is unit 'I', and the B_cov is diagonalized
+        # transform the vector into the space, where the W_cov is identity matrix 'I', and the B_cov is diagonalized
         # adapt from Wespeaker toolkit:
         # https://github.com/wenet-e2e/wespeaker/blob/master/wespeaker/utils/plda/two_cov_plda.py
         try:

@@ -88,7 +88,7 @@ def get_fbank(file_path: str) -> torch.Tensor:
     fbank = fbank_transform(waveform) + 1e-6
     fbank = fbank.log()
 
-    # 4. Cepstral/spectrum mean and variance normalization (CMVN), see:
+    # 4. Mean and variance normalization (CMVN), see:
     # Viikki, O., & Laurila, K. (1998).
     # Cepstral domain segmental feature vector normalization for noise robust speech recognition.
     # Speech Communication, 25(1), 133–147.
